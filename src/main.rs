@@ -1,3 +1,7 @@
+pub mod messages;
+
+const PORT: i32 = 19876;
+
 fn main() {
-    println!("Hello, world!");
+    println!("starting server on localhost:{}", PORT);
 }
