@@ -167,34 +167,43 @@ mod tests {
         }
 
         #[test]
-        fn single_char() {
+        fn ksb_single_char() {
             assert_ksb("F", "F");
         }
 
         #[test]
-        fn two_chars() {
+        fn ksb_two_chars() {
             assert_ksb("F--o", "Fo");
         }
 
         #[test]
-        fn minus() {
+        fn ksb_minus() {
             assert_ksb("-", "-");
         }
 
         #[test]
-        fn minus_multi() {
+        fn ksb_minus_multi() {
             assert_ksb("F-----o", "F-o");
         }
 
         #[test]
-        fn spec_space() {
+        fn ksb_spec_space() {
             assert_ksb("C--e--m--space--C--a--t", "Cem Cat");
         }
 
         #[test]
         #[ignore]
-        fn spec_backspace() {
+        fn ksb_spec_backspace() {
             assert_ksb("C--e--x--backspace--m", "Cem");
+        }
+
+        #[test]
+        fn ksb_letter_must_be_string() {
+            let s = "{type:'ksb',state:3,letter:4}";
+            match Message::from_str(&s).err() {
+                Some(err) => assert_eq!(err.description(), "invalid type: integer `4`, expected a string of characters separated with \'--\'"),
+                None => panic!("should have failed to parse {} since 'letter' is not a string", s),
+            }
         }
 
         #[test]
