@@ -152,17 +152,12 @@ mod tests {
 
         fn assert_ksb(letter: &str, result: &str) {
             let s = format!("{{type:'ksb',state:3,letter:'{}'}}", letter);
-            if let Message::KeyboardString {
-                letter: m,
-                state: _,
-            } = Message::from_str(&s).unwrap()
-            {
-                assert_eq!(result, m);
-            } else {
-                panic!(
+            match Message::from_str(&s) {
+                Ok(Message::KeyboardString { letter, state: _ }) => assert_eq!(result, letter),
+                _ => panic!(
                     "{} should have deserialized as KeyboardString({})",
                     s, result
-                );
+                ),
             }
         }
 
@@ -200,20 +195,21 @@ mod tests {
         #[test]
         fn ksb_letter_must_be_string() {
             let s = "{type:'ksb',state:3,letter:4}";
-            match Message::from_str(&s).err() {
-                Some(err) => assert_eq!(err.description(), "invalid type: integer `4`, expected a string of characters separated with \'--\'"),
-                None => panic!("should have failed to parse {} since 'letter' is not a string", s),
+            match  Message::from_str(&s) {
+                Err(err) => assert_eq!(err.description(), "invalid type: integer `4`, expected a string of characters separated with \'--\'"),
+                _ => panic!("should have failed to parse {} since 'letter' is not a string", s),
             }
         }
 
         #[test]
         fn mouse_move() {
             let s = "{type:'mmb',x:509,y:531}";
-            if let Message::MouseMove { x, y } = Message::from_str(s).unwrap() {
-                assert_eq!(509, x, "x");
-                assert_eq!(531, y, "y");
-            } else {
-                panic!("{} should have deserialized as MouseMove(509, 531)", s);
+            match Message::from_str(s) {
+                Ok(Message::MouseMove { x, y }) => {
+                    assert_eq!(509, x, "x");
+                    assert_eq!(531, y, "y");
+                }
+                _ => panic!("{} should have deserialized as MouseMove(509, 531)", s),
             }
         }
     }
