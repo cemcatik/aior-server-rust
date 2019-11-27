@@ -1,5 +1,5 @@
 [package]
-name = "rust-scratch"
+name = "aior-server"
 version = "0.1.0"
 authors = ["Cem Catikkas <cem.catikkas@gmail.com>"]
 edition = "2018"
