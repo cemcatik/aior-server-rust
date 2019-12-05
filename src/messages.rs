@@ -22,14 +22,14 @@ pub enum Message {
     MouseMove { x: i32, y: i32 },
 
     #[serde(rename = "ksb")]
-    KeyboardString {
+    KeyboardStr {
         #[serde(deserialize_with = "split_keys")]
         letter: String,
         state: u8,
     },
 
     #[serde(rename = "kib")]
-    KeyboardInt { letter: i32, state: u8 },
+    KeyboardInt { letter: u16, state: u8 },
 }
 
 impl Message {
@@ -83,6 +83,7 @@ pub enum AiocId {
     MouseLeftRelease = 57,
     MouseRightPress = 58,
     MouseRightRelease = 59,
+    MouseWheelUp = 60,
     MouseWheelDown = 61,
 }
 
@@ -126,7 +127,7 @@ mod tests {
 
         #[test]
         fn keyboard_string() {
-            let m = Message::KeyboardString {
+            let m = Message::KeyboardStr {
                 letter: "cemcatik".to_string(),
                 state: 13,
             };
@@ -153,7 +154,7 @@ mod tests {
         fn assert_ksb(letter: &str, result: &str) {
             let s = format!("{{type:'ksb',state:3,letter:'{}'}}", letter);
             match Message::from_str(&s) {
-                Ok(Message::KeyboardString { letter, state: _ }) => assert_eq!(result, letter),
+                Ok(Message::KeyboardStr { letter, state: _ }) => assert_eq!(result, letter),
                 _ => panic!(
                     "{} should have deserialized as KeyboardString({})",
                     s, result

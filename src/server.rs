@@ -1,5 +1,6 @@
 use crate::errors::*;
 use crate::messages::*;
+use crate::robot::*;
 use futures::prelude::*;
 use std::net::SocketAddr;
 use tokio;
@@ -21,18 +22,19 @@ lazy_static! {
 
 pub struct Server {
     port: u16,
+    robot: Robot,
 }
 
 impl Server {
-    pub fn new(port: u16) -> Server {
-        Server { port }
+    pub fn new(port: u16, robot: Robot) -> Server {
+        Server { port, robot }
     }
 
     fn address(&self) -> String {
         format!("localhost:{}", self.port)
     }
 
-    pub async fn start(&self) -> Result<()> {
+    pub async fn start(&mut self) -> Result<()> {
         let mut socket = self.bind().await?;
         self.serve(&mut socket).await
     }
@@ -49,7 +51,7 @@ impl Server {
             .await
     }
 
-    async fn serve(&self, socket: &mut UdpSocket) -> Result<()> {
+    async fn serve(&mut self, socket: &mut UdpSocket) -> Result<()> {
         loop {
             let mut buf = vec![0; 1024];
             let (size, dest) = socket.recv_from(&mut buf).await?;
@@ -64,7 +66,7 @@ impl Server {
     }
 
     async fn serve_msg(
-        &self,
+        &mut self,
         socket: &mut UdpSocket,
         dest: SocketAddr,
         msg: Message,
@@ -81,6 +83,27 @@ impl Server {
                     .map(|_| Ok(()))
                     .await
             }
+            Message::MouseMove { x, y } => self.robot.mouse_move(x, y).await,
+            Message::Aioc {
+                id: AiocId::MouseLeftPress,
+            } => self.robot.mouse_press(MouseButton::Left).await,
+            Message::Aioc {
+                id: AiocId::MouseLeftRelease,
+            } => self.robot.mouse_release(MouseButton::Left).await,
+            Message::Aioc {
+                id: AiocId::MouseRightPress,
+            } => self.robot.mouse_press(MouseButton::Right).await,
+            Message::Aioc {
+                id: AiocId::MouseRightRelease,
+            } => self.robot.mouse_release(MouseButton::Right).await,
+            Message::Aioc {
+                id: AiocId::MouseWheelUp,
+            } => self.robot.mouse_wheel(WheelDirection::Up).await,
+            Message::Aioc {
+                id: AiocId::MouseWheelDown,
+            } => self.robot.mouse_wheel(WheelDirection::Down).await,
+            Message::KeyboardStr { state: _, letter } => self.robot.keyboard_type_str(letter).await,
+            Message::KeyboardInt { state: _, letter } => self.robot.keyboard_type_int(letter).await,
             _ => {
                 println!("maybe next time");
                 Ok(())
