@@ -5,7 +5,7 @@ use serde_repr::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
-enum Message {
+pub enum Message {
     #[serde(rename = "aioc")]
     Aioc { id: AiocId },
 
@@ -42,7 +42,7 @@ impl Message {
     }
 }
 
-fn split_keys<'de, D>(deserializer: D) -> Result<String, D::Error>
+fn split_keys<'de, D>(deserializer: D) -> std::result::Result<String, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -57,7 +57,7 @@ impl<'de> Visitor<'de> for KeyboardStringVisitor {
         formatter.write_str("a string of characters separated with '--'")
     }
 
-    fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+    fn visit_string<E>(self, value: String) -> std::result::Result<Self::Value, E>
     where
         E: de::Error,
     {
@@ -77,7 +77,7 @@ impl<'de> Visitor<'de> for KeyboardStringVisitor {
 
 #[derive(Serialize_repr, Deserialize_repr, Debug)]
 #[repr(u8)]
-enum AiocId {
+pub enum AiocId {
     ConnectionReceived = 0,
     MouseLeftPress = 56,
     MouseLeftRelease = 57,
