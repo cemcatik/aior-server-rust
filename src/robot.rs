@@ -81,7 +81,7 @@ impl Robot {
         self.enigo.mouse_scroll_y(d);
     }
 
-    fn to_keys<F: FnMut(Key)>(letter: String, callback: &mut F) {
+    fn process_keys<F: FnMut(Key)>(letter: String, callback: &mut F) {
         letter.split("--").for_each(|l| match l {
             "backspace" => callback(enigo::Key::Backspace),
             "enter" => callback(enigo::Key::Return),
@@ -91,7 +91,7 @@ impl Robot {
     }
 
     fn keyboard_type_str(&mut self, letter: String) {
-        Robot::to_keys(letter, &mut |k| self.enigo.key_click(k));
+        Robot::process_keys(letter, &mut |k| self.enigo.key_click(k));
     }
 
     fn keyboard_type_int(&mut self, key: u16) {
@@ -113,31 +113,31 @@ impl From<MouseButton> for enigo::MouseButton {
 mod tests {
     use super::*;
 
-    fn assert_to_keys(letter: &str, expected: Vec<enigo::Key>) {
+    fn assert_process_keys(letter: &str, expected: Vec<enigo::Key>) {
         let mut actual = vec![];
-        Robot::to_keys(String::from(letter), &mut |k| actual.push(k));
+        Robot::process_keys(String::from(letter), &mut |k| actual.push(k));
         assert_eq!(&expected, &actual);
     }
 
     #[test]
     fn ksb_single_char() {
-        assert_to_keys("F", vec![enigo::Key::Layout('F')]);
+        assert_process_keys("F", vec![enigo::Key::Layout('F')]);
     }
 
     #[test]
     fn ksb_two_chars() {
-        assert_to_keys("F--o", vec![enigo::Key::Layout('F'), enigo::Key::Layout('o')]);
+        assert_process_keys("F--o", vec![enigo::Key::Layout('F'), enigo::Key::Layout('o')]);
     }
 
     #[test]
     fn ksb_minus() {
-        assert_to_keys("-", vec![enigo::Key::Layout('-')]);
+        assert_process_keys("-", vec![enigo::Key::Layout('-')]);
     }
 
     #[test]
     fn ksb_minus_multi() {
         "F-----o".split("--").for_each(|k| println!("{}", k));
-        assert_to_keys(
+        assert_process_keys(
             "F-----o",
             vec![
                 enigo::Key::Layout('F'),
@@ -149,7 +149,7 @@ mod tests {
 
     #[test]
     fn ksb_spec_space() {
-        assert_to_keys(
+        assert_process_keys(
             "C--e--m--space--C--a--t",
             vec![
                 enigo::Key::Layout('C'),
@@ -165,7 +165,7 @@ mod tests {
 
     #[test]
     fn ksb_spec_backspace() {
-        assert_to_keys(
+        assert_process_keys(
             "C--e--x--backspace--m",
             vec![
                 enigo::Key::Layout('C'),
