@@ -30,7 +30,7 @@ impl Robot {
         }
     }
 
-    pub async fn handle(&mut self, m: Message) -> Result<()> {
+    pub fn handle(&mut self, m: Message) -> Result<()> {
         match m {
             Message::MouseMove { x, y } => self.mouse_move(x, y),
             Message::Aioc {
