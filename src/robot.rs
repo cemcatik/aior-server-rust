@@ -32,27 +32,27 @@ impl Robot {
 
     pub async fn handle(&mut self, m: Message) -> Result<()> {
         match m {
-            Message::MouseMove { x, y } => self.mouse_move(x, y).await,
+            Message::MouseMove { x, y } => self.mouse_move(x, y),
             Message::Aioc {
                 id: AiocId::MouseLeftPress,
-            } => self.mouse_press(MouseButton::Left).await,
+            } => self.mouse_press(MouseButton::Left),
             Message::Aioc {
                 id: AiocId::MouseLeftRelease,
-            } => self.mouse_release(MouseButton::Left).await,
+            } => self.mouse_release(MouseButton::Left),
             Message::Aioc {
                 id: AiocId::MouseRightPress,
-            } => self.mouse_press(MouseButton::Right).await,
+            } => self.mouse_press(MouseButton::Right),
             Message::Aioc {
                 id: AiocId::MouseRightRelease,
-            } => self.mouse_release(MouseButton::Right).await,
+            } => self.mouse_release(MouseButton::Right),
             Message::Aioc {
                 id: AiocId::MouseWheelUp,
-            } => self.mouse_wheel(WheelDirection::Up).await,
+            } => self.mouse_wheel(WheelDirection::Up),
             Message::Aioc {
                 id: AiocId::MouseWheelDown,
-            } => self.mouse_wheel(WheelDirection::Down).await,
-            Message::KeyboardStr { state: _, letter } => self.keyboard_type_str(letter).await,
-            Message::KeyboardInt { state: _, letter } => self.keyboard_type_int(letter).await,
+            } => self.mouse_wheel(WheelDirection::Down),
+            Message::KeyboardStr { state: _, letter } => self.keyboard_type_str(letter),
+            Message::KeyboardInt { state: _, letter } => self.keyboard_type_int(letter),
             _ => {
                 println!("maybe next time");
                 Ok(())
@@ -60,26 +60,26 @@ impl Robot {
         }
     }
 
-    async fn mouse_move(&mut self, x: i32, y: i32) -> Result<()> {
+    fn mouse_move(&mut self, x: i32, y: i32) -> Result<()> {
         let x = (x as f32 * self.mouse_speed).round() as i32;
         let y = (y as f32 * self.mouse_speed).round() as i32;
         self.enigo.mouse_move_relative(x, y);
         Ok(())
     }
 
-    async fn mouse_press(&mut self, button: MouseButton) -> Result<()> {
+    fn mouse_press(&mut self, button: MouseButton) -> Result<()> {
         let eb = enigo::MouseButton::from(button);
         self.enigo.mouse_down(eb);
         Ok(())
     }
 
-    async fn mouse_release(&mut self, button: MouseButton) -> Result<()> {
+    fn mouse_release(&mut self, button: MouseButton) -> Result<()> {
         let eb = enigo::MouseButton::from(button);
         self.enigo.mouse_up(eb);
         Ok(())
     }
 
-    async fn mouse_wheel(&mut self, dir: WheelDirection) -> Result<()> {
+    fn mouse_wheel(&mut self, dir: WheelDirection) -> Result<()> {
         let d = match dir {
             WheelDirection::Up => -1,
             WheelDirection::Down => 1,
@@ -102,14 +102,14 @@ impl Robot {
         letter.split("--").map(to_key).flatten().collect()
     }
 
-    async fn keyboard_type_str(&mut self, letter: String) -> Result<()> {
+    fn keyboard_type_str(&mut self, letter: String) -> Result<()> {
         self.to_keys(letter)
             .iter()
             .for_each(|k| self.enigo.key_click(*k));
         Ok(())
     }
 
-    async fn keyboard_type_int(&mut self, key: u16) -> Result<()> {
+    fn keyboard_type_int(&mut self, key: u16) -> Result<()> {
         let key = enigo::Key::Raw(key);
         self.enigo.key_click(key);
         Ok(())

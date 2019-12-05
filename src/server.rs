@@ -59,13 +59,13 @@ impl Server {
                 .map_err(|e| Error::from(e))
                 .and_then(|m| Message::from_str(m).map_err(|e| Error::from(e)));
             match parsed {
-                Ok(msg) => self.serve_msg(socket, dest, msg).await?,
+                Ok(msg) => self.handle_msg(socket, dest, msg).await?,
                 Err(e) => eprintln!("error parsing message: {}", e),
             }
         }
     }
 
-    async fn serve_msg(
+    async fn handle_msg(
         &mut self,
         socket: &mut UdpSocket,
         dest: SocketAddr,
