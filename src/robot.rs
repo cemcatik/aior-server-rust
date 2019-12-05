@@ -1,8 +1,6 @@
 use crate::errors::*;
 use crate::messages::*;
 use enigo::*;
-use std::collections::*;
-use std::iter::*;
 
 pub struct Robot {
     enigo: Enigo,
@@ -89,23 +87,17 @@ impl Robot {
         Ok(())
     }
 
-    fn to_keys(&self, letter: String) -> LinkedList<enigo::Key> {
-        fn to_key(l: &str) -> Vec<enigo::Key> {
-            match l {
-                "backspace" => vec![enigo::Key::Backspace],
-                "enter" => vec![enigo::Key::Return],
-                "space" => vec![enigo::Key::Space],
-                x => x.chars().map(enigo::Key::Layout).collect(),
-            }
-        }
-
-        letter.split("--").map(to_key).flatten().collect()
+    fn to_keys<F: FnMut(Key)>(letter: String, callback: &mut F) {
+        letter.split("--").for_each(|l| match l {
+            "backspace" => callback(enigo::Key::Backspace),
+            "enter" => callback(enigo::Key::Return),
+            "space" => callback(enigo::Key::Space),
+            x => x.chars().for_each(|c| callback(enigo::Key::Layout(c))),
+        });
     }
 
     fn keyboard_type_str(&mut self, letter: String) -> Result<()> {
-        self.to_keys(letter)
-            .iter()
-            .for_each(|k| self.enigo.key_click(*k));
+        Robot::to_keys(letter, &mut |k| self.enigo.key_click(k));
         Ok(())
     }
 
@@ -129,26 +121,25 @@ impl From<MouseButton> for enigo::MouseButton {
 mod tests {
     use super::*;
 
-    fn assert_to_keys(letter: &str, expected: &[enigo::Key]) {
-        let r = Robot::new(1.0, 1.0);
-        let actual = r.to_keys(String::from(letter));
-        let expected = LinkedList::from_iter(expected.iter().map(|r| *r));
-        assert_eq!(expected, actual);
+    fn assert_to_keys(letter: &str, expected: Vec<enigo::Key>) {
+        let mut actual = vec![];
+        Robot::to_keys(String::from(letter), &mut |k| actual.push(k));
+        assert_eq!(&expected, &actual);
     }
 
     #[test]
     fn ksb_single_char() {
-        assert_to_keys("F", &[enigo::Key::Layout('F')]);
+        assert_to_keys("F", vec![enigo::Key::Layout('F')]);
     }
 
     #[test]
     fn ksb_two_chars() {
-        assert_to_keys("F--o", &[enigo::Key::Layout('F'), enigo::Key::Layout('o')]);
+        assert_to_keys("F--o", vec![enigo::Key::Layout('F'), enigo::Key::Layout('o')]);
     }
 
     #[test]
     fn ksb_minus() {
-        assert_to_keys("-", &[enigo::Key::Layout('-')]);
+        assert_to_keys("-", vec![enigo::Key::Layout('-')]);
     }
 
     #[test]
@@ -156,7 +147,7 @@ mod tests {
         "F-----o".split("--").for_each(|k| println!("{}", k));
         assert_to_keys(
             "F-----o",
-            &[
+            vec![
                 enigo::Key::Layout('F'),
                 enigo::Key::Layout('-'),
                 enigo::Key::Layout('o'),
@@ -168,7 +159,7 @@ mod tests {
     fn ksb_spec_space() {
         assert_to_keys(
             "C--e--m--space--C--a--t",
-            &[
+            vec![
                 enigo::Key::Layout('C'),
                 enigo::Key::Layout('e'),
                 enigo::Key::Layout('m'),
@@ -184,7 +175,7 @@ mod tests {
     fn ksb_spec_backspace() {
         assert_to_keys(
             "C--e--x--backspace--m",
-            &[
+            vec![
                 enigo::Key::Layout('C'),
                 enigo::Key::Layout('e'),
                 enigo::Key::Layout('x'),
