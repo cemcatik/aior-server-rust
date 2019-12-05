@@ -1,5 +1,4 @@
-use ascii::AsciiChar;
-use serde::de::*;
+use crate::errors::*;
 use serde::*;
 use serde_repr::*;
 
@@ -22,56 +21,19 @@ pub enum Message {
     MouseMove { x: i32, y: i32 },
 
     #[serde(rename = "ksb")]
-    KeyboardStr {
-        #[serde(deserialize_with = "split_keys")]
-        letter: String,
-        state: u8,
-    },
+    KeyboardStr { letter: String, state: u8 },
 
     #[serde(rename = "kib")]
     KeyboardInt { letter: u16, state: u8 },
 }
 
 impl Message {
-    pub fn from_str(s: &str) -> json5::Result<Message> {
-        json5::from_str(s)
+    pub fn from_str(s: &str) -> Result<Message> {
+        json5::from_str(s).map_err(|e| Error::from(e))
     }
 
-    pub fn to_string(m: &Message) -> json5::Result<String> {
-        json5::to_string(m)
-    }
-}
-
-fn split_keys<'de, D>(deserializer: D) -> std::result::Result<String, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    deserializer.deserialize_string(KeyboardStringVisitor)
-}
-
-struct KeyboardStringVisitor;
-impl<'de> Visitor<'de> for KeyboardStringVisitor {
-    type Value = String;
-
-    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str("a string of characters separated with '--'")
-    }
-
-    fn visit_string<E>(self, value: String) -> std::result::Result<Self::Value, E>
-    where
-        E: de::Error,
-    {
-        fn char_or_special(s: &str) -> Vec<char> {
-            match s {
-                "backspace" => vec![AsciiChar::BackSpace.as_char()],
-                "enter" => vec!['\n'],
-                "space" => vec![' '],
-                x => x.chars().collect::<Vec<_>>(),
-            }
-        }
-
-        let parts: String = value.split("--").map(char_or_special).flatten().collect();
-        return Ok(parts);
+    pub fn to_string(m: &Message) -> Result<String> {
+        json5::to_string(m).map_err(|e| Error::from(e))
     }
 }
 
@@ -151,54 +113,31 @@ mod tests {
     mod de {
         use super::super::*;
 
-        fn assert_ksb(letter: &str, result: &str) {
-            let s = format!("{{type:'ksb',state:3,letter:'{}'}}", letter);
+        #[test]
+        fn ksb() {
+            let expected = "C--e--x--backspace--m";
+            let s = format!("{{type:'ksb',state:3,letter:'{}'}}", expected);
             match Message::from_str(&s) {
-                Ok(Message::KeyboardStr { letter, state: _ }) => assert_eq!(result, letter),
+                Ok(Message::KeyboardStr { letter, state: _ }) => assert_eq!(expected, letter),
                 _ => panic!(
                     "{} should have deserialized as KeyboardString({})",
-                    s, result
+                    s, expected
                 ),
             }
         }
 
         #[test]
-        fn ksb_single_char() {
-            assert_ksb("F", "F");
-        }
-
-        #[test]
-        fn ksb_two_chars() {
-            assert_ksb("F--o", "Fo");
-        }
-
-        #[test]
-        fn ksb_minus() {
-            assert_ksb("-", "-");
-        }
-
-        #[test]
-        fn ksb_minus_multi() {
-            assert_ksb("F-----o", "F-o");
-        }
-
-        #[test]
-        fn ksb_spec_space() {
-            assert_ksb("C--e--m--space--C--a--t", "Cem Cat");
-        }
-
-        #[test]
-        #[ignore]
-        fn ksb_spec_backspace() {
-            assert_ksb("C--e--x--backspace--m", "Cem");
-        }
-
-        #[test]
         fn ksb_letter_must_be_string() {
             let s = "{type:'ksb',state:3,letter:4}";
-            match  Message::from_str(&s) {
-                Err(err) => assert_eq!(err.description(), "invalid type: integer `4`, expected a string of characters separated with \'--\'"),
-                _ => panic!("should have failed to parse {} since 'letter' is not a string", s),
+            match Message::from_str(&s) {
+                Err(err) => assert_eq!(
+                    err.to_string(),
+                    "invalid type: integer `4`, expected a string"
+                ),
+                _ => panic!(
+                    "should have failed to parse {} since 'letter' is not a string",
+                    s
+                ),
             }
         }
 
