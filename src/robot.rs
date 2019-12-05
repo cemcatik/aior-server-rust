@@ -1,4 +1,3 @@
-use crate::errors::*;
 use crate::messages::*;
 use enigo::*;
 
@@ -28,7 +27,7 @@ impl Robot {
         }
     }
 
-    pub fn handle(&mut self, m: Message) -> Result<()> {
+    pub fn handle(&mut self, m: Message) {
         match m {
             Message::MouseMove { x, y } => self.mouse_move(x, y),
             Message::Aioc {
@@ -53,38 +52,33 @@ impl Robot {
             Message::KeyboardInt { letter, .. } => self.keyboard_type_int(letter),
             _ => {
                 println!("maybe next time");
-                Ok(())
             }
         }
     }
 
-    pub fn mouse_move(&mut self, x: i32, y: i32) -> Result<()> {
+    pub fn mouse_move(&mut self, x: i32, y: i32) {
         let x = x * self.mouse_speed.round() as i32;
         let y = y * self.mouse_speed.round() as i32;
         self.enigo.mouse_move_relative(x, y);
-        Ok(())
     }
 
-    fn mouse_press(&mut self, button: MouseButton) -> Result<()> {
+    fn mouse_press(&mut self, button: MouseButton) {
         let eb = enigo::MouseButton::from(button);
         self.enigo.mouse_down(eb);
-        Ok(())
     }
 
-    fn mouse_release(&mut self, button: MouseButton) -> Result<()> {
+    fn mouse_release(&mut self, button: MouseButton) {
         let eb = enigo::MouseButton::from(button);
         self.enigo.mouse_up(eb);
-        Ok(())
     }
 
-    fn mouse_wheel(&mut self, dir: WheelDirection) -> Result<()> {
+    fn mouse_wheel(&mut self, dir: WheelDirection) {
         let d = match dir {
             WheelDirection::Up => -1,
             WheelDirection::Down => 1,
         };
         let d = d * self.wheel_speed.round() as i32;
         self.enigo.mouse_scroll_y(d);
-        Ok(())
     }
 
     fn to_keys<F: FnMut(Key)>(letter: String, callback: &mut F) {
@@ -96,15 +90,13 @@ impl Robot {
         });
     }
 
-    fn keyboard_type_str(&mut self, letter: String) -> Result<()> {
+    fn keyboard_type_str(&mut self, letter: String) {
         Robot::to_keys(letter, &mut |k| self.enigo.key_click(k));
-        Ok(())
     }
 
-    fn keyboard_type_int(&mut self, key: u16) -> Result<()> {
+    fn keyboard_type_int(&mut self, key: u16) {
         let key = enigo::Key::Raw(key);
         self.enigo.key_click(key);
-        Ok(())
     }
 }
 
