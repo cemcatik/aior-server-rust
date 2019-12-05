@@ -83,31 +83,7 @@ impl Server {
                     .map(|_| Ok(()))
                     .await
             }
-            Message::MouseMove { x, y } => self.robot.mouse_move(x, y).await,
-            Message::Aioc {
-                id: AiocId::MouseLeftPress,
-            } => self.robot.mouse_press(MouseButton::Left).await,
-            Message::Aioc {
-                id: AiocId::MouseLeftRelease,
-            } => self.robot.mouse_release(MouseButton::Left).await,
-            Message::Aioc {
-                id: AiocId::MouseRightPress,
-            } => self.robot.mouse_press(MouseButton::Right).await,
-            Message::Aioc {
-                id: AiocId::MouseRightRelease,
-            } => self.robot.mouse_release(MouseButton::Right).await,
-            Message::Aioc {
-                id: AiocId::MouseWheelUp,
-            } => self.robot.mouse_wheel(WheelDirection::Up).await,
-            Message::Aioc {
-                id: AiocId::MouseWheelDown,
-            } => self.robot.mouse_wheel(WheelDirection::Down).await,
-            Message::KeyboardStr { state: _, letter } => self.robot.keyboard_type_str(letter).await,
-            Message::KeyboardInt { state: _, letter } => self.robot.keyboard_type_int(letter).await,
-            _ => {
-                println!("maybe next time");
-                Ok(())
-            }
+            m => self.robot.handle(m).await,
         }
     }
 }
