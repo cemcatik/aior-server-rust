@@ -60,9 +60,9 @@ impl Robot {
         }
     }
 
-    fn mouse_move(&mut self, x: i32, y: i32) -> Result<()> {
-        let x = (x as f32 * self.mouse_speed).round() as i32;
-        let y = (y as f32 * self.mouse_speed).round() as i32;
+    pub fn mouse_move(&mut self, x: i32, y: i32) -> Result<()> {
+        let x = x * self.mouse_speed.round() as i32;
+        let y = y * self.mouse_speed.round() as i32;
         self.enigo.mouse_move_relative(x, y);
         Ok(())
     }
@@ -84,7 +84,7 @@ impl Robot {
             WheelDirection::Up => -1,
             WheelDirection::Down => 1,
         };
-        let d = (d as f32 * self.wheel_speed).round() as i32;
+        let d = d * self.wheel_speed.round() as i32;
         self.enigo.mouse_scroll_y(d);
         Ok(())
     }
