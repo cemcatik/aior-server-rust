@@ -126,7 +126,10 @@ mod tests {
 
     #[test]
     fn ksb_two_chars() {
-        assert_process_keys("F--o", vec![enigo::Key::Layout('F'), enigo::Key::Layout('o')]);
+        assert_process_keys(
+            "F--o",
+            vec![enigo::Key::Layout('F'), enigo::Key::Layout('o')],
+        );
     }
 
     #[test]
