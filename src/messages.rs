@@ -118,7 +118,7 @@ mod tests {
             let expected = "C--e--x--backspace--m";
             let s = format!("{{type:'ksb',state:3,letter:'{}'}}", expected);
             match Message::from_str(&s) {
-                Ok(Message::KeyboardStr { letter, state: _ }) => assert_eq!(expected, letter),
+                Ok(Message::KeyboardStr { letter, .. }) => assert_eq!(expected, letter),
                 _ => panic!(
                     "{} should have deserialized as KeyboardString({})",
                     s, expected
