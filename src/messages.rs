@@ -61,7 +61,7 @@ mod tests {
             };
             let j = Message::to_string(&m).unwrap();
             let e = format!(
-                "{{\"type\":\"aioc\",\"id\":{}}}",
+                r#"{{"type":"aioc","id":{}}}"#,
                 AiocId::MouseLeftPress as i32
             );
             assert_eq!(e, j);
@@ -75,7 +75,7 @@ mod tests {
                 message: "os-version-arch".to_string(),
             };
             let j = Message::to_string(&m).unwrap();
-            let e = "{\"type\":\"cs\",\"sender\":\"server\",\"status\":\"acceptUdpConnection\",\"statusMessage\":\"os-version-arch\"}";
+            let e = r#"{"type":"cs","sender":"server","status":"acceptUdpConnection","statusMessage":"os-version-arch"}"#;
             assert_eq!(e, j);
         }
 
@@ -83,7 +83,7 @@ mod tests {
         fn mouse_move() {
             let m = Message::MouseMove { x: 10, y: 135 };
             let j = Message::to_string(&m).unwrap();
-            let e = "{\"type\":\"mmb\",\"x\":10,\"y\":135}";
+            let e = r#"{"type":"mmb","x":10,"y":135}"#;
             assert_eq!(e, j);
         }
 
@@ -94,7 +94,7 @@ mod tests {
                 state: 13,
             };
             let j = Message::to_string(&m).unwrap();
-            let e = "{\"type\":\"ksb\",\"letter\":\"cemcatik\",\"state\":13}";
+            let e = r#"{"type":"ksb","letter":"cemcatik","state":13}"#;
             assert_eq!(e, j);
         }
 
@@ -105,7 +105,7 @@ mod tests {
                 state: 14,
             };
             let j = Message::to_string(&m).unwrap();
-            let e = "{\"type\":\"kib\",\"letter\":13,\"state\":14}";
+            let e = r#"{"type":"kib","letter":13,"state":14}"#;
             assert_eq!(e, j);
         }
     }
