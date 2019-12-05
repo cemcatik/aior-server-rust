@@ -78,13 +78,14 @@ impl Server {
             } => {
                 println!("connection attempt from {}", dest);
                 let conn_resp = Message::to_string(&ACCEPT_CONNECTION_RESP)? + "\n";
-                socket
+                return socket
                     .send_to(conn_resp.as_bytes(), dest)
                     .map_err(Error::from)
                     .map(|_| Ok(()))
-                    .await
+                    .await;
             }
             m => self.robot.handle(m),
-        }
+        };
+        Ok(())
     }
 }
