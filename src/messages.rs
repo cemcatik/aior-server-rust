@@ -62,7 +62,7 @@ mod tests {
             let j = Message::to_string(&m).unwrap();
             let e = format!(
                 r#"{{"type":"aioc","id":{}}}"#,
-                AiocId::MouseLeftPress as i32
+                AiocId::MouseLeftPress as u8
             );
             assert_eq!(e, j);
         }
