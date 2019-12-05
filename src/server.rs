@@ -2,6 +2,7 @@ use crate::errors::*;
 use crate::messages::*;
 use crate::robot::*;
 use futures::prelude::*;
+use lazy_static::lazy_static;
 use std::net::SocketAddr;
 use tokio;
 use tokio::net::UdpSocket;

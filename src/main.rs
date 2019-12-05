@@ -7,9 +7,6 @@ use errors::*;
 use robot::*;
 use server::*;
 
-#[macro_use]
-extern crate lazy_static;
-
 const PORT: u16 = 19876;
 const MOUSE_SPEED: f32 = 1.0;
 const WHEEL_SPEED: f32 = 1.0;
