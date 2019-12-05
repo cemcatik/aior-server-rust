@@ -10,23 +10,25 @@ pub enum Error {
     JsonError(json5::Error),
 }
 
+impl Error {
+    fn to_inner(&self) -> &(dyn error::Error + 'static) {
+        match self {
+            Error::IoError(ref e) => e,
+            Error::StrError(ref e) => e,
+            Error::JsonError(ref e) => e,
+        }
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::IoError(ref e) => e.fmt(f),
-            Error::StrError(ref e) => e.fmt(f),
-            Error::JsonError(ref e) => e.fmt(f),
-        }
+        fmt::Display::fmt(&self.to_inner(), f)
     }
 }
 
 impl error::Error for Error {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        match *self {
-            Error::IoError(ref e) => Some(e),
-            Error::StrError(ref e) => Some(e),
-            Error::JsonError(ref e) => Some(e),
-        }
+        Some(self.to_inner())
     }
 }
 
