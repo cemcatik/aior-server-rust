@@ -84,7 +84,7 @@ impl Server {
                     .map(|_| Ok(()))
                     .await
             }
-            m => self.robot.handle(m).await,
+            m => self.robot.handle(m),
         }
     }
 }
