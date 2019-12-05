@@ -48,7 +48,7 @@ impl Server {
                 Ok(_) => println!("server started on {}", addr),
                 Err(e) => eprintln!("failed to bind: {}", e),
             })
-            .map_err(|e| Error::from(e))
+            .map_err(Error::from)
             .await
     }
 
@@ -57,8 +57,8 @@ impl Server {
             let mut buf = vec![0; 1024];
             let (size, dest) = socket.recv_from(&mut buf).await?;
             let parsed = std::str::from_utf8(&buf[0..size])
-                .map_err(|e| Error::from(e))
-                .and_then(|m| Message::from_str(m).map_err(|e| Error::from(e)));
+                .map_err(Error::from)
+                .and_then(|m| Message::from_str(m).map_err(Error::from));
             match parsed {
                 Ok(msg) => self.handle_msg(socket, dest, msg).await?,
                 Err(e) => eprintln!("error parsing message: {}", e),
@@ -80,7 +80,7 @@ impl Server {
                 let conn_resp = Message::to_string(&ACCEPT_CONNECTION_RESP)? + "\n";
                 socket
                     .send_to(conn_resp.as_bytes(), dest)
-                    .map_err(|e| Error::from(e))
+                    .map_err(Error::from)
                     .map(|_| Ok(()))
                     .await
             }

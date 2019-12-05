@@ -29,11 +29,11 @@ pub enum Message {
 
 impl Message {
     pub fn from_str(s: &str) -> Result<Message> {
-        json5::from_str(s).map_err(|e| Error::from(e))
+        json5::from_str(s).map_err(Error::from)
     }
 
     pub fn to_string(m: &Message) -> Result<String> {
-        json5::to_string(m).map_err(|e| Error::from(e))
+        json5::to_string(m).map_err(Error::from)
     }
 }
 
