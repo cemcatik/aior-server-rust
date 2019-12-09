@@ -79,7 +79,7 @@ impl Server {
                 println!("connection attempt from {}", dest);
 
                 let dest = {
-                    let mut d = SocketAddr::from(dest);
+                    let mut d = dest;
                     d.set_port(self.port);
                     d
                 };

@@ -48,11 +48,9 @@ impl Robot {
             Message::Aioc {
                 id: AiocId::MouseWheelDown,
             } => self.mouse_wheel(WheelDirection::Down),
-            Message::KeyboardStr { letter, .. } => self.keyboard_type_str(letter),
+            Message::KeyboardStr { letter, state: 1 } => self.keyboard_type_str(letter),
             Message::KeyboardInt { letter, .. } => self.keyboard_type_int(letter),
-            _ => {
-                println!("maybe next time");
-            }
+            u => println!("Unhandled messge {:?}", u),
         }
     }
 
