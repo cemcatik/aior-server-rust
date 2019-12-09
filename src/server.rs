@@ -8,16 +8,16 @@ use tokio;
 use tokio::net::UdpSocket;
 
 lazy_static! {
-    static ref ACCEPT_CONNECTION_RESP: Message = {
-        let info = os_info::get();
-        let os = info.os_type().to_string();
-        let version = info.version().to_string();
-        let arch = String::from("???");
-        Message::ConnStatus {
+    static ref ACCEPT_CONNECTION_RESP: String = {
+        let os = String::from("Mac OS X");
+        let version = String::from("10.15.1");
+        let arch = String::from("x86_64");
+        let msg = Message::ConnStatus {
             sender: String::from("server"),
             status: String::from("acceptUdpConnection"),
             message: format!("{}-{}-{}", os, version, arch),
-        }
+        };
+        Message::to_string(&msg).unwrap() + "\n"
     };
 }
 
@@ -32,7 +32,7 @@ impl Server {
     }
 
     fn address(&self) -> String {
-        format!("localhost:{}", self.port)
+        format!("0:{}", self.port)
     }
 
     pub async fn start(&mut self) -> Result<()> {
@@ -77,9 +77,15 @@ impl Server {
                 id: AiocId::ConnectionReceived,
             } => {
                 println!("connection attempt from {}", dest);
-                let conn_resp = Message::to_string(&ACCEPT_CONNECTION_RESP)? + "\n";
+
+                let dest = {
+                    let mut d = SocketAddr::from(dest);
+                    d.set_port(self.port);
+                    d
+                };
+
                 return socket
-                    .send_to(conn_resp.as_bytes(), dest)
+                    .send_to(ACCEPT_CONNECTION_RESP.as_bytes(), dest)
                     .map_err(Error::from)
                     .map(|_| Ok(()))
                     .await;
