@@ -49,6 +49,12 @@ impl Robot {
                 id: AiocId::MouseWheelDown,
             } => self.mouse_wheel(WheelDirection::Down),
             Message::KeyboardStr { letter, state: 1 } => self.keyboard_type_str(letter),
+            Message::KeyboardStr { letter, state: 2 } if letter == " " => {
+                self.enigo.key_click(enigo::Key::Space)
+            }
+            Message::KeyboardStr { letter, state: 2 } if letter == "enter" => {
+                self.enigo.key_click(enigo::Key::Return)
+            }
             Message::KeyboardInt { letter, .. } => self.keyboard_type_int(letter),
             u => println!("Unhandled messge {:?}", u),
         }
